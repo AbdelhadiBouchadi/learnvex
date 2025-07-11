@@ -22,8 +22,9 @@ const arcjet = aj
     }),
   );
 
-export async function createCourse(
-  values: CourseSchemaType,
+export async function editCourse(
+  data: CourseSchemaType,
+  courseId: string,
 ): Promise<APIResponse> {
   const session = await requireAdmin();
 
@@ -49,31 +50,31 @@ export async function createCourse(
       }
     }
 
-    const validation = courseSchema.safeParse(values);
+    const result = courseSchema.safeParse(data);
 
-    if (!validation.success) {
+    if (!result.success) {
       return {
         status: "error",
-        message: "Invalid Form Data",
+        message: "Invalid Data",
       };
     }
 
-    await db.course.create({
-      data: {
-        ...validation.data,
-        description: validation.data.description,
-        userId: session?.user.id,
+    await db.course.update({
+      where: {
+        id: courseId,
+        userId: session.user.id,
       },
+      data: { ...result.data },
     });
 
     return {
       status: "success",
-      message: "Course Created Succesfully",
+      message: "Course Updated Successfully",
     };
-  } catch {
+  } catch (error) {
     return {
-      status: "error",
-      message: "Failed to create course",
+      status: "success",
+      message: "Failed to update course",
     };
   }
 }

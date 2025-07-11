@@ -59,10 +59,10 @@ export const AnimatedCardGrid: React.FC<AnimatedCardGridProps> = ({
           key={index}
           variants={itemVariants}
           whileHover={{
-            scale: 1.05,
-            transition: { duration: 0.2 },
+            y: -5,
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
           }}
-          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 100 }}
         >
           {child}
         </motion.div>

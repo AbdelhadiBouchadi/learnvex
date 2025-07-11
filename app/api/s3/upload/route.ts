@@ -1,13 +1,42 @@
+import { requireAdmin } from "@/app/data/admin/require-admin";
+import { aj, detectBot, fixedWindow } from "@/lib/arcjet";
+import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { S3 } from "@/lib/S3Client";
 import { fileUploadSchema } from "@/lib/validator";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
+const arcjet = aj
+  .withRule(
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+  )
+  .withRule(
+    fixedWindow({
+      mode: "LIVE",
+      window: "1m",
+      max: 5,
+    }),
+  );
+
 export async function POST(req: Request) {
+  const session = await requireAdmin();
+
   try {
+    const decision = await arcjet.protect(req, {
+      fingerprint: session?.user.id as string,
+    });
+
+    if (decision.isDenied()) {
+      return NextResponse.json({ error: "dudde not good" }, { status: 429 });
+    }
+
     const body = await req.json();
 
     const validation = fileUploadSchema.safeParse(body);

@@ -18,7 +18,7 @@ import {
   courseStatus,
 } from "@/lib/validator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon, PlusIcon, SparklesIcon } from "lucide-react";
+import { Loader2Icon, PencilLineIcon, SparklesIcon } from "lucide-react";
 import React, { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import slugify from "slugify";
@@ -36,30 +36,38 @@ import { tryCatch } from "@/hooks/try-catch";
 import { createCourse } from "@/app/admin/courses/create/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { AdminCourseSingularType } from "@/app/data/admin/admin-get-course";
+import { editCourse } from "@/app/admin/courses/[courseId]/edit/actions";
 
-const CreateCourseForm = () => {
+interface EditCourseFormProps {
+  data: AdminCourseSingularType;
+}
+
+const EditCourseForm = ({ data }: EditCourseFormProps) => {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const form = useForm<CourseSchemaType>({
     resolver: zodResolver(courseSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      fileKey: "",
-      price: 0,
-      duration: 0,
-      level: "Beginner",
-      category: "IT & Software",
-      status: "Draft",
-      slug: "",
-      smallDescription: "",
+      title: data.title,
+      description: data.description,
+      fileKey: data.fileKey,
+      price: data.price,
+      duration: data.duration,
+      level: data.level,
+      category: data.category as CourseSchemaType["category"],
+      status: data.status,
+      slug: data.slug,
+      smallDescription: data.smallDescription,
     },
   });
 
   const onSubmit = (values: CourseSchemaType) => {
     startTransition(async () => {
-      const { data: result, error } = await tryCatch(createCourse(values));
+      const { data: result, error } = await tryCatch(
+        editCourse(values, data.id),
+      );
 
       if (error) {
         toast.error("An unexpected error occured");
@@ -67,9 +75,9 @@ const CreateCourseForm = () => {
       }
 
       if (result.status === "success") {
-        toast.success("Course created successfully");
+        toast.success("Course updated successfully");
         form.reset();
-        router.push("/admin/courses");
+        router.push(`/admin/courses`);
       } else if (result.status === "error") {
         toast.error(result.message);
       }
@@ -284,13 +292,13 @@ const CreateCourseForm = () => {
         <Button type="submit" className="w-full" disabled={isPending}>
           {isPending ? (
             <>
-              <span>Creating</span>
+              <span>Editing</span>
               <Loader2Icon className="size-4 animate-spin" />
             </>
           ) : (
             <>
-              <span>Create Course</span>
-              <PlusIcon />
+              <span>Edit Course</span>
+              <PencilLineIcon />
             </>
           )}
         </Button>
@@ -299,4 +307,4 @@ const CreateCourseForm = () => {
   );
 };
 
-export default CreateCourseForm;
+export default EditCourseForm;

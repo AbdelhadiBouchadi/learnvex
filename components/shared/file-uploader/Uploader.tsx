@@ -12,6 +12,7 @@ import {
 } from "./RenderState";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
+import { useConstructUrl } from "@/hooks/use-construct-url";
 
 interface FileStateProps {
   id: string | null;
@@ -31,6 +32,8 @@ interface UploaderProps {
 }
 
 export function Uploader({ value, onValueChange }: UploaderProps) {
+  const fileUrl = useConstructUrl(value || "");
+
   const [fileState, setFileState] = useState<FileStateProps>({
     id: null,
     file: null,
@@ -39,8 +42,8 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
     progress: 0,
     key: value,
     error: false,
-    objectUrl: "",
     fileType: "image",
+    objectUrl: fileUrl,
   });
 
   const handleFileUpload = async (file: File) => {
@@ -122,13 +125,14 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
         xhr.send(file);
       });
     } catch (error) {
-      (toast.error("Something went wrong ..."),
-        setFileState((prev) => ({
-          ...prev,
-          progress: 0,
-          error: true,
-          isUploading: false,
-        })));
+      console.log(error);
+      toast.error("Something went wrong ...");
+      setFileState((prev) => ({
+        ...prev,
+        progress: 0,
+        error: true,
+        isUploading: false,
+      }));
     }
   };
 
@@ -261,6 +265,8 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
         error: false,
         isDeleting: false,
       }));
+
+      console.log(error);
     }
   };
 
@@ -285,7 +291,7 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
     <Card
       {...getRootProps()}
       className={cn(
-        "relative h-64 w-full rounded-lg border-2 border-dashed transition-colors duration-200",
+        "relative h-64 w-full rounded-lg border-2 border-dashed py-0 transition-colors duration-200",
         isDragActive
           ? "border-primary bg-primary/10 border-solid"
           : "border-border hover:border-primary",
@@ -294,7 +300,7 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
           : "cursor-pointer",
       )}
     >
-      <CardContent className="flex h-full w-full items-center justify-center rounded-lg p-4">
+      <CardContent className="flex h-full w-full items-center justify-center rounded-lg">
         <input
           {...getInputProps()}
           disabled={

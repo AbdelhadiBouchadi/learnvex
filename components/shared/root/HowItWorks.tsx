@@ -57,26 +57,19 @@ export const HowItWorks: React.FC = () => {
             const Icon = step.icon;
 
             return (
-              <motion.div
-                key={idx}
-                className="relative"
-                whileHover={{ y: -8 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card className="bg-background dark:bg-card h-48 transition-shadow hover:shadow-2xl">
-                  <CardHeader className="flex flex-row items-center space-x-2">
-                    <Icon className="text-primary size-8" />
-                    <CardTitle className="text-primary text-2xl">
-                      {step.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {step.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+              <Card className="bg-background dark:bg-card h-48" key={idx}>
+                <CardHeader className="flex flex-row items-center space-x-2">
+                  <Icon className="text-primary size-8" />
+                  <CardTitle className="text-primary text-2xl">
+                    {step.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {step.description}
+                  </p>
+                </CardContent>
+              </Card>
             );
           })}
         </AnimatedCardGrid>

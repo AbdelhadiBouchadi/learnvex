@@ -121,7 +121,7 @@ export function RenderUploadedState({
       <Image
         src={previewUrl}
         alt="Preview Image"
-        className="object-contain p-2"
+        className="object-contain"
         fill
       />
 

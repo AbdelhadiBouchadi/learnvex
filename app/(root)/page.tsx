@@ -64,10 +64,7 @@ export default async function Home() {
           const Icon = feature.icon;
 
           return (
-            <Card
-              key={idx}
-              className="bg-background dark:bg-card h-48 transition-shadow hover:shadow-2xl"
-            >
+            <Card key={idx} className="bg-background dark:bg-card h-48">
               <CardHeader className="flex flex-row items-center space-x-2">
                 <Icon className="text-primary size-8" />
                 <CardTitle className="text-primary text-2xl">

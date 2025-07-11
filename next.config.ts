@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "avatars.githubusercontent.com",
         port: "",
       },
+      {
+        protocol: "https",
+        hostname: "learn-vex-bucket.fly.storage.tigris.dev",
+        port: "",
+      },
     ],
   },
 };

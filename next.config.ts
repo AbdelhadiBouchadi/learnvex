@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "learn-vex-bucket.fly.storage.tigris.dev",
+        hostname: "learn-vex.fly.storage.tigris.dev",
         port: "",
       },
     ],

@@ -88,8 +88,6 @@ export function Uploader({ value, onValueChange, fileUrl }: UploaderProps) {
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
 
-        xhr.timeout = 300000; // 5 minutes
-
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
             const percentageCompleted = (event.loaded / event.total) * 100;
@@ -107,7 +105,7 @@ export function Uploader({ value, onValueChange, fileUrl }: UploaderProps) {
               ...prev,
               progress: 100,
               isUploading: false,
-              key,
+              key: key,
             }));
 
             onValueChange?.(key);
@@ -181,7 +179,7 @@ export function Uploader({ value, onValueChange, fileUrl }: UploaderProps) {
         }
 
         setFileState({
-          file,
+          file: file,
           isUploading: false,
           progress: 0,
           objectUrl: URL.createObjectURL(file),

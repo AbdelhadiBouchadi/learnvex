@@ -18,7 +18,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SortableItem } from "../SortableItem";
 import { AdminCourseSingularType } from "@/app/data/admin/admin-get-course";
 import {
@@ -62,6 +62,25 @@ export default function CourseStructure({ data }: CourseStructureProps) {
     })) || [];
 
   const [items, setItems] = useState(initialItems);
+
+  useEffect(() => {
+    setItems((prev) => {
+      const updatedItems =
+        data.chapter.map((chapter) => ({
+          id: chapter.id,
+          title: chapter.title,
+          order: chapter.position,
+          isOpen: prev.find((item) => item.id === chapter.id)?.isOpen ?? false, // Default chapters to open
+          lessons: chapter.lesson.map((lesson) => ({
+            id: lesson.id,
+            title: lesson.title,
+            order: lesson.position,
+          })),
+        })) || [];
+
+      return updatedItems;
+    });
+  }, [data]);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;

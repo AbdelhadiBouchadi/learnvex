@@ -63,6 +63,7 @@ export const AnimatedCardGrid: React.FC<AnimatedCardGridProps> = ({
             boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
           }}
           transition={{ type: "spring", stiffness: 100 }}
+          className="rounded-lg"
         >
           {child}
         </motion.div>

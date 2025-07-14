@@ -12,7 +12,6 @@ import {
 } from "./RenderState";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
-import { useConstructUrl } from "@/hooks/use-construct-url";
 
 interface FileStateProps {
   id: string | null;
@@ -29,11 +28,10 @@ interface FileStateProps {
 interface UploaderProps {
   value?: string;
   onValueChange?: (value: string) => void;
+  fileUrl?: string;
 }
 
-export function Uploader({ value, onValueChange }: UploaderProps) {
-  const fileUrl = useConstructUrl(value || "");
-
+export function Uploader({ value, onValueChange, fileUrl }: UploaderProps) {
   const [fileState, setFileState] = useState<FileStateProps>({
     id: null,
     file: null,
@@ -46,7 +44,9 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
     objectUrl: fileUrl,
   });
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File, retryCount = 0) => {
+    const maxRetries = 3;
+
     setFileState((prev) => ({
       ...prev,
       isUploading: true,
@@ -69,6 +69,8 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
       });
 
       if (!presignedResponse.ok) {
+        const errorData = await presignedResponse.json().catch(() => ({}));
+        console.error("Presigned URL error:", errorData);
         toast.error("Failed to get presigned URL");
 
         setFileState((prev) => ({
@@ -85,6 +87,8 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
 
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
+
+        xhr.timeout = 300000; // 5 minutes
 
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
@@ -112,12 +116,28 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
 
             resolve();
           } else {
+            console.error(
+              "Upload failed with status:",
+              xhr.status,
+              xhr.statusText,
+            );
             reject(new Error("Upload Failed"));
           }
         };
 
-        xhr.onerror = () => {
+        xhr.onerror = (error) => {
+          console.error("XHR Error:", error);
           reject(new Error("Upload Failed"));
+        };
+
+        xhr.ontimeout = () => {
+          console.error("Upload timeout");
+          reject(new Error("Upload timeout"));
+        };
+
+        xhr.onabort = () => {
+          console.error("Upload aborted");
+          reject(new Error("Upload aborted"));
         };
 
         xhr.open("PUT", presignedUrl);
@@ -125,7 +145,22 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
         xhr.send(file);
       });
     } catch (error) {
-      console.log(error);
+      console.error("Upload error:", error);
+
+      // Retry logic
+      if (retryCount < maxRetries) {
+        console.log(`Retrying upload (${retryCount + 1}/${maxRetries})...`);
+        toast.info(
+          `Upload failed, retrying... (${retryCount + 1}/${maxRetries})`,
+        );
+
+        // Wait before retrying (exponential backoff)
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.pow(2, retryCount) * 1000),
+        );
+
+        return handleFileUpload(file, retryCount + 1);
+      }
       toast.error("Something went wrong ...");
       setFileState((prev) => ({
         ...prev,
@@ -305,7 +340,7 @@ export function Uploader({ value, onValueChange }: UploaderProps) {
           {...getInputProps()}
           disabled={
             fileState.isUploading ||
-            !!fileState.objectUrl ||
+            // !!fileState.objectUrl ||
             fileState.isDeleting
           }
         />

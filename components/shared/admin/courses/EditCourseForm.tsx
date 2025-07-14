@@ -38,6 +38,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { AdminCourseSingularType } from "@/app/data/admin/admin-get-course";
 import { editCourse } from "@/app/admin/courses/[courseId]/edit/actions";
+import { useConstructUrl } from "@/hooks/use-construct-url";
 
 interface EditCourseFormProps {
   data: AdminCourseSingularType;
@@ -46,6 +47,7 @@ interface EditCourseFormProps {
 const EditCourseForm = ({ data }: EditCourseFormProps) => {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const fileUrl = useConstructUrl(data.fileKey);
 
   const form = useForm<CourseSchemaType>({
     resolver: zodResolver(courseSchema),
@@ -171,7 +173,11 @@ const EditCourseForm = ({ data }: EditCourseFormProps) => {
             <FormItem className="w-full">
               <FormLabel>Thumbnail Image</FormLabel>
               <FormControl>
-                <Uploader value={field.value} onValueChange={field.onChange} />
+                <Uploader
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  fileUrl={fileUrl}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
